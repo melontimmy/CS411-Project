@@ -1,0 +1,57 @@
+Currently proceeding with proposal 1
+
+Proposal 1: wat-to-cook(idk what to cook) idk man i suck at naming
+
+Main features:
+List recipes from existing ingredients
+List missing ingredients from recipe, include prices
+?Buy missing ingredients from Amazon, grocery
+
+List recipes - search for a food in recipe list
+             - categorize food by region
+             - filter food based on dietary requirements, i.e. vegan, gluten, etc.
+
+Use of Data base - favoriting recipes
+                 - recipe view/search history
+                 - account login details, etc.
+
+APIs required:
+Recipe API, ?Food API
+Grocery API, ?Amazon API
+
+Potential APIs:
+          
+
+
+
+-----------------------------------------------------------------------------------
+Proposal 2: trivHub (trivia hub)
+
+Main features:
+Answer trivia questions(duh)
+View upcoming trivia events(in local area, other areas)
+?Find cheapest plane tickets to trivia events
+?View result of previous trivia events
+View Leaderboard
+
+Use of Data base - all questions answered
+                 - accuracy of questions
+                 - how much questions have been answered
+
+Potential APIs:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
