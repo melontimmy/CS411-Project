@@ -1,1 +1,21 @@
-eirfnerifnerfoerineorivgreoigberuvgbewofcnvwoerjvbevborarbnvoeroivneorjv neodncewdnweodwednowidnweidnwdoiwendwon,
+Currently proceeding with proposal 1
+
+Proposal 1: wat-to-cook(idk what to cook) idk man i suck at naming
+
+wat-to-cook is an web application that assists users in finding users what its name suggests, what to cook. The application will offer recipes from a food API, 
+and feature UI to sort recipes based on dietary requirements, regions, and etc.. Some essential features of this website include the ability to list what
+the user has in their fridge, and generating a list of recipes that are possible with the available ingredients, or listing missing ingredients an user is
+missing in an receipt. For missing ingredients, the application will query a list of possible e-grocers such as Amazon, or Weeee for current market prices
+on the missing ingredients, and offer links to the E-grocers to make purchasing missing ingredients convienent. The user can also choose to create an account on
+the website to store the contents of their fridge, search and view history of recipes, as well as favoriting any recipes for later use.
+
+-----------------------------------------------------------------------------------
+Proposal 2: trivHub (trivia hub)
+
+trivHub is an web application intended for use for trivia enthusiasts. The site will offer a near endless stream of trivia questions for practice, as well as 
+record keeping so users can review questions that they've answered incorrectly, as well as their general accuracy while answering questions. A leaderboard
+tracking the users who have answered the most questions and the users who have the highest accuracy will be implemented. The site will also display local and
+major trivia competitions so the user can keep track of any trivia competitions that are being hosted nearby. If an user is interested
+in a particular trivia competition, directions to the trivia competition will be provided if the trivia competition is local, and a list of the cheapest
+plane flights to the trivia competition will be provided if the competition is out-of-state. A web-scaper will also be used to display the results of 
+previous trivia events.
