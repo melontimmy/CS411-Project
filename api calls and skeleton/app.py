@@ -32,18 +32,12 @@ def home():
 	else:
 		ingredients = flask.request.form['ingredients']
 
-		url = "https://api.spoonacular.com/food/products/search?query=yogurt&apiKey="
-		apikey = "a8fbdd86a4e74f5897ab358e550cc549"
-		
-		auth = HTTPBasicAuth('apikey', "a8fbdd86a4e74f5897ab358e550cc549")
+		query = {'includeIngredients':ingredients, 'apiKey':'a8fbdd86a4e74f5897ab358e550cc549'}
+		response = requests.get('https://api.spoonacular.com/recipes/complexSearch', params=query).json()["results"]
 
-		#query = {'includeIngredients':ingredients}
-		#response = requests.get('https://api.spoonacular.com/recipes/complexSearch', params=query, auth=auth)
+		print(response)
 
-		response2 = requests.request("GET", url+apikey).json()["products"]
-
-
-		return render_template('home.html', recipes = response2)
+		return render_template('home.html', recipes = response)
 
 if __name__ == "__main__":
 	#this is invoked when in the shell  you run
