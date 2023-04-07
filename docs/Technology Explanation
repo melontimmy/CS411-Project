@@ -1,0 +1,7 @@
+Project Assignment #3: Prototyping API calls
+
+The technology stack we are demonstrating consists of Flask, which uses Python and HTML, along with SQL for our database. Flask is a powerful framework
+that supports Javascript, and in general is a good fit for a web application. Other technology stacks such as Django seemed promising, but a few key
+aspects led us to believe that Flask is a better fit for our purposes. For example, Flask incorporates general support for  RESTful APIs while Django
+doesn’t explicitly have it. As well, Flask is flexible and allows for more control over our application. In addition, two of the members of our team are
+familiar with Flask and SQL from previous classwork, and we have several examples to reference for ease of development. 
