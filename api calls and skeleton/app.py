@@ -41,11 +41,11 @@ def home():
 		#response = requests.get('https://api.spoonacular.com/recipes/complexSearch', params=query, auth=auth)
 
 		response2 = requests.request("GET", url+apikey).json()["products"]
-
-
 		
-		return render_template('home.html')
 
+		print(response2)
+		
+		return render_template('home.html', recipes = response2)
 
 if __name__ == "__main__":
 	#this is invoked when in the shell  you run
