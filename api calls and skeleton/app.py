@@ -41,10 +41,8 @@ def home():
 		#response = requests.get('https://api.spoonacular.com/recipes/complexSearch', params=query, auth=auth)
 
 		response2 = requests.request("GET", url+apikey).json()["products"]
-		
 
-		print(response2)
-		
+
 		return render_template('home.html', recipes = response2)
 
 if __name__ == "__main__":

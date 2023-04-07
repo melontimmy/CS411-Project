@@ -21,8 +21,7 @@
 <h2>Here are some recipes with your ingredients:</h2>
     <ul>
     {% for recipe in recipes %}
-        <li>{{recipe[title]}}<br> 
-        <li>{{recipe[1]}}<br>     
+        <li>{{recipe['title']}}<br> 
     {% endfor %}
     </ul>
 {% endif %}
