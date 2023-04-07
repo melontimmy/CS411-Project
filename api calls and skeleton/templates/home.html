@@ -1,0 +1,32 @@
+<!doctype html>
+{% if message %}
+  <h4>{{message}}!</h4>
+{% endif %}
+<title>Wattocook</title>
+
+<body>
+  <div class="title">
+      <h1>Search for recipes</h1>
+  </div>
+  <div id="content">
+      <form method="post" action="{{ url_for('home') }}">
+          <label for="email">Enter your ingredients, separated by commas:</label>
+          <input type="text" name="ingredients" /><br />
+          <input type="submit" />
+      </form>
+   </div>
+</body>
+
+{% if recipes %}
+<h2>Here are some recipes with your ingredients:</h2>
+    <ul>
+    {% for recipe in recipes %}
+        <li>{{recipe[title]}}<br> 
+        <li>{{recipe[1]}}<br>     
+    {% endfor %}
+    </ul>
+{% endif %}
+
+<ul>
+<li><a href='/'>Home</a></li>
+</ul>
