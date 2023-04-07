@@ -1,12 +1,13 @@
 import requests
 
-#https://www.themealdb.com/api.php
+#api references: https://www.themealdb.com/api.php
 url = "http://www.themealdb.com/api/json/v1/1/filter.php?i=chicken"
 
 response = requests.request("GET", url)
 
 #print(response.text)
 
+#api references: https://rapidapi.com/spoonacular/api/recipe-food-nutrition/
 
 url = "https://api.spoonacular.com/food/products/search?query=yogurt&apiKey="
 
