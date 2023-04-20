@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+    <title>Register</title>
+</head>
+
+<body>
+    <div class="title">
+        <h2>Enter your information to register:</h2>
+    </div>
+    <div id="content">
+        <form method="post" action="{{ url_for('register_user') }}">
+            <label >First name:</label>
+            <input name="fname" />
+            <label>  Last name:</label>
+            <input name="lname" /><br />
+            <label for="email">Email:</label>
+            <input type="email" name="email" /><br />
+            <label for="password">Password:</label>
+            <input type="password" name="password" /><br />
+            <label for="phonenum">Phone Number:</label>
+            <input type="tel" name="phonenum" /><br />
+            <label for="dob">Date of Birth:</label>
+            <input type="date" name="dob" /><br />
+            <input type="submit" />
+        </form>
+     </div>
+</body>
+{% if message %}
+    {{message}}
+{% endif %}
