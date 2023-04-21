@@ -6,3 +6,26 @@
 <ul>
 <li><a href='/'>Home</a></li>
 </ul>
+
+<div class="title">
+  <h2>{{recipe['title']}}</h2>
+</div>
+
+<div class="content">
+  <img src="{{ recipe['image'] }}" alt="The image for this recipe was not found!">
+  <p><strong>Cuisine:</strong> {{recipe['cuisines']}}</p>
+  
+  <p><strong>Ingredients:</strong></p>
+  <ul>
+    {% for ingredient in recipe['extendedIngredients'] %}
+    <li>{{ ingredient['original'] }}</li>
+    {% endfor %}
+  </ul>
+
+  <p><strong>Instructions:</strong></p>
+  <ol>
+    {% for step in recipe['analyzedInstructions'][0]['steps'] %}
+    <li>{{ step['step'] }}</li>
+    {% endfor %}
+  </ol>
+</div>
