@@ -1,6 +1,9 @@
 <head>
     <title>Profile</title>
 </head>
+{% if message %}
+	<div>{{ message }}</div>
+{% endif %}
 
 <li><a href='/'>Home</a></li>
 <li><a href='/logout'>Logout</a></li>

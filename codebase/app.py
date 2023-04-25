@@ -1,14 +1,18 @@
 import flask
-from flask import Flask, Response, request, render_template, redirect, url_for
+from flask import Flask, Response, request, render_template, redirect, url_for, session
 from flaskext.mysql import MySQL
 import flask_login
 import requests
 import json
+import os
+from authlib.integrations.flask_client import OAuth
 
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
+
 mysql = MySQL(app)
+oauth = OAuth(app)
 
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
@@ -25,6 +29,7 @@ def getUsers():
 	cursor = conn.cursor()
 	cursor.execute("SELECT email from Users")
 	return cursor.fetchall()
+
 
 @login_manager.user_loader
 def user_loader(email):
@@ -50,7 +55,7 @@ def request_loader(request):
 	user.is_authenticated = request.form['password'] == pwd
 	return user
 
-###################################################
+####### LOGIN METHODS #########
 
 def emailExists(email):
 	#use this to check if a email has already been registered
@@ -64,8 +69,13 @@ def emailExists(email):
 class User(flask_login.UserMixin):
 	pass
 
+def loginUser(email):
+	user = User()
+	user.id = email
+	flask_login.login_user(user) 
+
 @app.route('/login', methods=['GET', 'POST'])
-def login():
+def std_login(): #standard login without oauth
 	# if POST, get email and pass
 	if flask.request.method == 'POST' and 'email' in request.form and 'password' in request.form:
 		email = flask.request.form['email']
@@ -76,9 +86,7 @@ def login():
 			data = cursor.fetchall() 
 			password = str(data[0][0]) 
 			if flask.request.form['password'] == password:
-				user = User()
-				user.id = email
-				flask_login.login_user(user) 
+				loginUser(email)
 				return flask.redirect(flask.url_for('loadProfile'))
 		# user or pass was incorrect
 		return "<a href='/login'>Try again</a>\
@@ -95,7 +103,9 @@ def logout():
 @app.route('/profile')
 @flask_login.login_required
 def loadProfile():
-	return render_template('profile.html', name=flask_login.current_user.id)
+	email = flask_login.current_user.id
+	message = 'Hi ' + email + ', here is your profile!'
+	return render_template('profile.html', name=flask_login.current_user.id, message=message)
 
 @app.route("/register", methods=['GET'])
 def register():
@@ -118,13 +128,46 @@ def register_user():
 		cursor.execute("INSERT INTO Users (email, password, phone_number, dob, first_name, last_name) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')".format(email, password, phonenum, dob, fname, lname))
 		# still need to add field for username
 		conn.commit()
-		user = User()
-		user.id = email
-		flask_login.login_user(user)
-		return render_template('profile.html', name=flask_login.current_user.id, message='Account Created!')
+		loginUser(email)
+		message = 'Hi ' + email + ', here is your profile!'
+		return render_template('profile.html', name=flask_login.current_user.id, message=message)
 	else:
 		return render_template('register.html', message='Email already in use!')
 
+
+###### OAUTH METHODS ########
+# to test oauth gmail must be registered as a test account for this project
+# cannot save google query results to database (restrictions i think), results are purged once app quits
+
+google = oauth.register( 
+	'google',
+	client_id='862135099082-a6oqavdq547skp16ndpcjvvg9r9e09b5.apps.googleusercontent.com',
+    client_secret='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',
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid profile email'}
+)
+
+@app.route('/google-login')
+def login():
+    google = oauth.create_client('google')  # create the google oauth client
+    redirect_uri = url_for('authorize', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+
+@app.route('/authorize')
+def authorize():
+	google = oauth.create_client('google')
+	token = google.authorize_access_token()
+	userinfo = token['userinfo']
+	session['user'] = userinfo
+	email = userinfo['email']
+	if not emailExists(email): #inputs email and name into database so user can log into flask
+		fname = userinfo['given_name']
+		lname = userinfo['family_name']
+		cursor = conn.cursor()
+		cursor.execute("INSERT INTO Users (email, first_name, last_name) VALUES ('{0}', '{1}', '{2}')".format(email, fname, lname))
+	loginUser(email)
+	return flask.redirect(flask.url_for('loadProfile'))
 
 '''
 A new page looks like this:
