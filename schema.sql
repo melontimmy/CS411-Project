@@ -21,12 +21,6 @@ CREATE TABLE IF NOT EXISTS Food_categories(
 
 );
 
-CREATE TABLE IF NOT EXISTS Cuisines(
-	cuisine_id int4 AUTO_INCREMENT, 
-    cuisine_name VARCHAR(255),
-    CONSTRAINT cuisines_pk PRIMARY KEY (cuisine_id)
-
-);
 
 CREATE TABLE IF NOT EXISTS Ingredients( 
 	ingredient_id int4 AUTO_INCREMENT, 
@@ -39,13 +33,11 @@ CREATE TABLE IF NOT EXISTS Ingredients(
 );
 
 CREATE TABLE IF NOT EXISTS Recipes( 
-	recipe_id int4 AUTO_INCREMENT, 
+	recipe_id int4, 
     recipe_name VARCHAR(255),
     date_saved DATE,
     cooked BIT,
-    cuisine_id int4,
-    CONSTRAINT recipes_pk PRIMARY KEY (recipe_id),
-    FOREIGN KEY (cuisine_id) REFERENCES Cuisines(cuisine_id) ON DELETE CASCADE
+    CONSTRAINT recipes_pk PRIMARY KEY (recipe_id)
 
 );
 
