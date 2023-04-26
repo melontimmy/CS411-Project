@@ -361,11 +361,9 @@ def recipe():
 
 			url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/" + str(id) + "/information"
 
-			print(url)
 
 			response = requests.request("GET", url, headers=headers, params=querystring)
 
-			print(response)
 
 			return render_template('recipe.html', recipe=response.json())
 
