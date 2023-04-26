@@ -30,6 +30,10 @@ def getUsers():
 	cursor.execute("SELECT email from Users")
 	return cursor.fetchall()
 
+def getUserIdFromEmail(email):
+	cursor = conn.cursor()
+	cursor.execute("SELECT user_id  FROM Users WHERE email = '{0}'".format(email))
+	return cursor.fetchone()[0]
 
 @login_manager.user_loader
 def user_loader(email):
@@ -168,6 +172,104 @@ def authorize():
 		cursor.execute("INSERT INTO Users (email, first_name, last_name) VALUES ('{0}', '{1}', '{2}')".format(email, fname, lname))
 	loginUser(email)
 	return flask.redirect(flask.url_for('loadProfile'))
+
+
+
+####### INGREDIENTS METHODS ########
+
+def getIngredients():
+	email = flask_login.current_user.id
+	id = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+	cursor.execute("SELECT ingredient_name FROM Ingredients NATURAL JOIN Owned_by WHERE user_id = '{0}'".format(id))
+	ingredients = []
+	if cursor.rowcount > 0:
+		for i in cursor:
+			ingredients.append(i[0])
+
+	return ingredients
+
+def ingredientExists(ingredient):
+	# returns -1 if ingredient not found
+	cursor = conn.cursor()
+	if cursor.execute("SELECT ingredient_id FROM Ingredients WHERE ingredient_name = '{0}'".format(ingredient)):
+		#this means there are greater than zero entries with that ingredient name
+		return cursor.fetchone()[0]
+	else:
+		return -1
+	
+def alreadyInFridge(ingredient):
+	# returns -1 if ingredient not found
+	email = flask_login.current_user.id
+	uid = getUserIdFromEmail(email)
+	iid = ingredientExists(ingredient)
+	cursor = conn.cursor()
+	if cursor.execute("SELECT ingredient_id FROM Owned_by WHERE ingredient_id = '{0}' AND user_id = '{1}'".format(iid, uid)):
+		#this means there are greater than zero entries with that ingredient name
+		return True
+	else:
+		return False
+
+
+@app.route('/fridge')
+def fridge():
+	ingredients = getIngredients()
+	if len(ingredients) > 0:
+		return render_template('fridge.html', ingredients=ingredients)
+	return render_template('fridge.html')
+
+
+@app.route("/fridge", methods=['POST', 'GET'])
+@flask_login.login_required
+def fridge_handler():
+	cmd = request.form.get("cmd")
+	if cmd == "Delete":
+		return deleteFromFridge()
+	else:
+		return addToFridge()
+
+@app.route('/fridge')
+def addToFridge():
+	try:
+		ingredients = flask.request.form['ingredients']
+	except:
+		return flask.redirect(flask.url_for('fridge'))
+	list = ingredients.split(',')
+
+	email = flask_login.current_user.id
+	uid = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+	for i in list:
+		if i != '':
+			iid = ingredientExists(i)
+			if iid == -1:
+				# add ingredient to existing list
+				cursor.execute("INSERT INTO Ingredients (ingredient_name) VALUE ('{0}')".format(i))
+				conn.commit()
+				iid = ingredientExists(i)
+			if not alreadyInFridge(i):
+				cursor.execute("INSERT INTO Owned_by (user_id, ingredient_id) VALUES ('{0}', '{1}')".format(int(uid), int(iid)))
+				conn.commit()
+
+	return flask.redirect(flask.url_for('fridge'))
+
+@app.route("/fridge")
+def deleteFromFridge():
+	try:
+		ingredients = flask.request.form['ingredients']
+	except:
+		return flask.redirect(flask.url_for('fridge'))
+	list = ingredients.split(',')
+	email = flask_login.current_user.id
+	uid = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+	for i in list:
+		if i != '':
+			iid = ingredientExists(i)
+			if alreadyInFridge(i):
+				cursor.execute("DELETE FROM Owned_by WHERE user_id = '{0}' AND ingredient_id = '{1}'".format(uid, iid))
+				conn.commit()
+	return flask.redirect(flask.url_for('fridge'))
 
 '''
 A new page looks like this:
