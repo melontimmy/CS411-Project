@@ -1,0 +1,83 @@
+<!doctype html>
+<title>Wattocook</title>
+
+<div class="title">
+    <h1>Watto Cook</h1>
+</div>
+
+{% if message %}
+  <h4>{{message}}!</h4>
+{% endif %}
+
+<ul style="list-style: none;">
+    <li><a href='/'>Home</a></li>
+    {% if name %}
+        <li><a href='/profile'>View Profile</a></li>
+        <li><a href='/logout'>Logout</a></li>
+    {% else %}
+        <li><a href='/login'>Login</a></li>
+    {% endif %}
+    <li><a href='/'>Search For Recipes</a></li>
+</ul>
+
+<body>
+  <div class="title">
+      <h2>Search for recipes</h2>
+  </div>
+  <div id="content">
+      <form method="post" action="{{ url_for('browse') }}">
+          <label for="text">Search For:</label>
+          <input type="text" name="query" value="{{query}}"/> <br />
+
+          <label for="text">Include Ingredients:</label> <!--should be a radio button-->
+          <input type="text" name="includeIngredients" value="{{includeIngredients}}"/><br />
+
+          <label for="text">Exclude Ingredients:</label>
+          <input type="text" name="excludeIngredients" value="{{excludeIngredients}}"/><br />
+
+          <label for="text">Equipment Required:</label> <!--should be a radio button-->
+          <input type="text" name="equipment" value="{{equipment}}" /><br />
+
+          <label for="text">Cuisine:</label>
+          <input type="text" name="cuisine" value="{{cuisine}}"/><br />
+
+          <label for="text">Diet:</label>
+          <input type="text" name="diet" value="{{diet}}" /><br />
+
+          <label for="text">Intolerances:</label>
+          <input type="text" name="intolerances" value="{{intolerances}}" /><br />
+
+          <label for="text">Offset:</label>
+          <input type="text" name="offset" value="{{offset}}"/><br />
+
+          <!--should include ranking, should be a radio button
+          #"titleMatch":"Crock Pot", -->
+
+          <input type="submit" name ="submit" />
+
+          {% if recipes %}
+          <form method="post" action="{{ url_for('browse') }}">
+            <input type="submit" value="<<" name="back"/>
+            <input type="submit" value=">>" name="forward" />
+          </form>
+          {% endif %}
+
+      </form>
+   </div>
+</body>
+
+{% if recipes %}
+<h2>Here are some recipes with your ingredients:</h2>
+    <ul style="list-style: none;">
+    {% for recipe in recipes %}
+        <li><a href= "{{'/recipe/?id=' ~ recipe['id'] }}">{{recipe['title']}}</a><br> 
+        <img src="{{ recipe['image'] }}" alt="The image for this recipe was not found!">
+        <li> {{recipe['cuisines']}}</li>
+        <li> {{recipe['type']}}</li>
+    {% endfor %}
+    
+    </ul>
+
+{% endif %}
+
+

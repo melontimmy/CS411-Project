@@ -1,0 +1,26 @@
+<head>
+    <title>Fridge</title>
+</head>
+
+<div>
+	<h2>Ingredients in your Fridge</h2>
+	<form action="{{ url_for('fridge_handler') }}" method="post">
+		<div class="form-group">
+			<label for="text">Add or remove ingredients, separated by commas:</label>
+			<input type="text" name="ingredients">
+		</div> 
+		<button type="submit" name="cmd" value="Add" class="btn btn-primary">Add</button>
+        <button type="submit" name="cmd" value="Delete" class="btn btn-primary">Remove</button>
+	</form>
+</div>
+
+{% if ingredients %}
+    {% for ingredient in ingredients %}
+        {{ ingredient }}<br />
+    {% endfor %}
+{% else %}
+    <h4>Nothing saved to your fridge!</h4>
+{% endif %}
+<br />
+<a href='/'>Home</a><br />
+<a href='/profile'>Back to Profile</a>

@@ -1,0 +1,25 @@
+<head>
+    <title>Profile</title>
+</head>
+{% if message %}
+	<div>{{ message }}</div>
+{% endif %}
+
+{% if recipes %}
+<h2>Here are your saved recipes:</h2>
+    <ul style="list-style: none;">
+    {% for recipe in recipes %}
+        <li><a href='/recipe'>{{recipe['title']}}</a><br> 
+        <img src="{{ recipe['image'] }}" alt="The image for this recipe was not found!">
+        <li> {{recipe['cuisines']}}</li>
+        <li> {{recipe['type']}}</li>
+    {% endfor %}
+    
+    </ul>
+{% else %}
+<h4>No recipes saved yet :/ Return back to <a href='/'>home</a> to start looking!</h4>
+{% endif %}
+
+<li><a href='/'>Home</a></li>
+<li><a href='/fridge'>Fridge</a></li>
+<li><a href='/logout'>Logout</a></li>
