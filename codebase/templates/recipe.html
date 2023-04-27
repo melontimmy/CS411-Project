@@ -9,6 +9,19 @@
   <h2>{{recipe['title']}}</h2>
 </div>
 
+
+<body>
+  <div id="content">
+      <form method="post" action="{{ url_for('recipe', id=id)  }}">
+          {% if saved %}
+          <input type="submit" value = "Unsave recipe" name ="submit" />
+          {% else %}
+          <input type="submit" value = "Save recipe" name ="submit" />
+          {% endif %}
+      </form>
+   </div>
+</body>
+
 <div class="content">
   <img src="{{ recipe['image'] }}" alt="The image for this recipe was not found!">
   <p><strong>Cuisine:</strong> {{recipe['cuisines']}}</p>

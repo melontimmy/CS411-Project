@@ -108,7 +108,19 @@ def logout():
 def loadProfile():
 	email = flask_login.current_user.id
 	message = 'Hi ' + email + ', here is your profile!'
-	return render_template('profile.html', name=flask_login.current_user.id, message=message)
+
+	url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/informationBulk"
+
+	querystring = {"ids":','.join(str(x) for x in getSavedRecipes())}
+
+	headers = {
+		"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+		"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
+	}
+	response = requests.get(url, headers=headers, params=querystring).json()
+
+	#print(response["result"])
+	return render_template('profile.html', name=flask_login.current_user.id, message=message, recipes=response)
 
 @app.route("/register", methods=['GET'])
 def register():
@@ -360,11 +372,57 @@ def recipe():
 			}
 
 			url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/" + str(id) + "/information"
-
-
+			
 			response = requests.request("GET", url, headers=headers, params=querystring)
 
+			saved = False
+			
+			if flask_login.current_user.is_authenticated:
+				saved = recipeSaved(id)
+			return render_template('recipe.html', recipe=response.json(), saved=saved, id=id)
+	else:
+		if not flask_login.current_user.is_authenticated:
+			return flask.redirect(flask.url_for('std_login'))
+		email = flask_login.current_user.id
+		uid = getUserIdFromEmail(email)
+		cursor = conn.cursor()
+		id = request.args.get("id")
+		if id:
+			if recipeSaved(id):
+				#remove recipe
+				cursor.execute("DELETE FROM Saved_by WHERE user_id = '{0}' AND recipe_id = '{1}'".format(uid, id))
+	
+				conn.commit()
+			else:
+				if not cursor.execute("SELECT recipe_id FROM Recipes WHERE recipe_id = '{0}'".format(id)):
+					cursor.execute("INSERT INTO Recipes (recipe_id) VALUES ('{0}')".format(id))
+				cursor.execute("INSERT INTO Saved_by (user_id, recipe_id) VALUES ('{0}', '{1}')".format((uid), (id)))
+				conn.commit()
 
-			return render_template('recipe.html', recipe=response.json())
+				#add recipe
+			return flask.redirect(flask.url_for('loadProfile'))
 
+
+def getSavedRecipes(): 
+	email = flask_login.current_user.id
+	id = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+	cursor.execute("SELECT recipe_id FROM Recipes NATURAL JOIN Saved_by WHERE user_id = '{0}'".format(id))
+	recipes = []
+	if cursor.rowcount > 0:
+		for i in cursor:
+			recipes.append(i[0])
+
+	return recipes
+
+def recipeSaved(recipeID):
+	email = flask_login.current_user.id
+	uid = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+	if cursor.execute("SELECT recipe_id FROM Saved_by WHERE recipe_id = '{0}' AND user_id = '{1}'".format(recipeID, uid)):
+		return True
+	else:
+		return False
+
+	
 if __name__ == "__main__": app.run(port=5000, debug=True)
