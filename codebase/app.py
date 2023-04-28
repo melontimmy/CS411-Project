@@ -119,7 +119,6 @@ def loadProfile():
 	}
 	response = requests.get(url, headers=headers, params=querystring).json()
 
-	#print(response["result"])
 	return render_template('profile.html', name=flask_login.current_user.id, message=message, recipes=response)
 
 @app.route("/register", methods=['GET'])
@@ -401,7 +400,6 @@ def recipe():
 
 				#add recipe
 			return flask.redirect(flask.url_for('loadProfile'))
-
 
 def getSavedRecipes(): 
 	email = flask_login.current_user.id
