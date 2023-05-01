@@ -15,6 +15,13 @@
       <form method="post" action="{{ url_for('recipe', id=id)  }}">
           {% if saved %}
           <input type="submit" value = "Unsave recipe" name ="submit" />
+
+          {% if cooked %}
+          <input type="submit" value = "Recipe cooked" name ="cookedButton" />
+          % else %
+          <input type="submit" value = "Recipe not cooked" name ="cookedButton" />
+          {% endif %}
+
           {% else %}
           <input type="submit" value = "Save recipe" name ="submit" />
           {% endif %}
@@ -40,3 +47,16 @@
     {% endfor %}
   </ol>
 </div>
+
+<p><strong>Missing Ingredients and Possible Weee products:</strong></p>
+  <ul>
+    {% for ingredient in missing %}
+    <li>{{ingredient['name']}}
+
+    {% if ingredient['weee'] %}
+      <a href="{{ingredient['weee']['view_link']}}">{{ingredient['weee']["name"]}}</a>
+      <img src="{{ingredient['weee']['img']}}" alt="The image for this recipe was not found!" width="300" height="300">
+    {% endif %}
+  </li>
+    {% endfor %}
+  </ul>

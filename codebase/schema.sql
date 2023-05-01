@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS Users (
 	dob DATE,
     first_name CHAR(27),
     last_name CHAR(27),
+    zipcode CHAR(5),
 	CONSTRAINT users_pk PRIMARY KEY (user_id)
 );
 

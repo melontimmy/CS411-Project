@@ -294,7 +294,6 @@ def browse():
 			querystring = {
 				"number":"20",
 				"ignorePantry":"true",
-				"addRecipeInformation":"true",
 				"instructionsRequired":"true",
 				"fillIngredients":"true"
 				#should include ranking, should be a radio button
@@ -317,12 +316,24 @@ def browse():
 			message = 'Login to save your recipes'
 			email = None
 
+
 			if flask_login.current_user.is_authenticated:
 				email = flask_login.current_user.id
 				message = 'Welcome, ' + email
-	
+
 			if response.status_code == 200:
-				return render_template('browse.html', recipes = response.json()["results"], message=message, **varDict, name=email)
+
+				results = response.json()["results"]
+				missing = {}
+				for recipe in results:
+					recipe["missingString"] = ""
+
+					for missing in recipe["missedIngredients"]:
+						recipe["missingString"] = recipe["missingString"] + missing["name"] + ","
+					recipe["missingString"] = recipe["missingString"][:-1]
+					print(recipe)
+
+				return render_template('browse.html', recipes = results, message=message, **varDict, name=email)
 			else:
 				return render_template('browse.html', message='Something went wrong! Code: ' + str(response.status_code))
 
@@ -378,7 +389,26 @@ def recipe():
 			
 			if flask_login.current_user.is_authenticated:
 				saved = recipeSaved(id)
-			return render_template('recipe.html', recipe=response.json(), saved=saved, id=id)
+		
+			missingKeys = request.args.get("missing")
+			missing = []
+
+			if missingKeys:
+				missingKeys = missingKeys[:1]
+				for ingred in missingKeys:
+					url2 = "https://weee-grocery-api-sayweee-com-browsing-searching-details.p.rapidapi.com/search"
+					querystring2 = {"zipcode":getZipcode(),"keyword":ingred,"limit":"1","offset":"0"}
+					headers2 = {
+						"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+						"X-RapidAPI-Host": "weee-grocery-api-sayweee-com-browsing-searching-details.p.rapidapi.com"
+					}
+
+					response2 = requests.get(url2, headers=headers2, params=querystring2).json()["data"]
+
+					if response2 and response2.get('products'): missing += [{"name":ingred,"weee":response2["products"][0]}] 
+					else: missing += [{"name":ingred,"weee":None}]
+
+			return render_template('recipe.html', recipe=response.json(), saved=saved, id=id, missing=missing, cooked=False)
 	else:
 		if not flask_login.current_user.is_authenticated:
 			return flask.redirect(flask.url_for('std_login'))
@@ -386,20 +416,25 @@ def recipe():
 		uid = getUserIdFromEmail(email)
 		cursor = conn.cursor()
 		id = request.args.get("id")
-		if id:
-			if recipeSaved(id):
-				#remove recipe
-				cursor.execute("DELETE FROM Saved_by WHERE user_id = '{0}' AND recipe_id = '{1}'".format(uid, id))
-	
-				conn.commit()
-			else:
-				if not cursor.execute("SELECT recipe_id FROM Recipes WHERE recipe_id = '{0}'".format(id)):
-					cursor.execute("INSERT INTO Recipes (recipe_id) VALUES ('{0}')".format(id))
-				cursor.execute("INSERT INTO Saved_by (user_id, recipe_id) VALUES ('{0}', '{1}')".format((uid), (id)))
-				conn.commit()
 
-				#add recipe
-			return flask.redirect(flask.url_for('loadProfile'))
+		if flask.request.form.get('submit'):
+			if id:
+				if recipeSaved(id):
+					#remove recipe
+					cursor.execute("DELETE FROM Saved_by WHERE user_id = '{0}' AND recipe_id = '{1}'".format(uid, id))
+		
+					conn.commit()
+				else:
+					if not cursor.execute("SELECT recipe_id FROM Recipes WHERE recipe_id = '{0}'".format(id)):
+						cursor.execute("INSERT INTO Recipes (recipe_id) VALUES ('{0}')".format(id))
+					cursor.execute("INSERT INTO Saved_by (user_id, recipe_id) VALUES ('{0}', '{1}')".format((uid), (id)))
+					conn.commit()
+
+					#add recipe
+				return flask.redirect(flask.url_for('loadProfile'))
+		else:
+
+			print('wow')
 
 def getSavedRecipes(): 
 	email = flask_login.current_user.id
@@ -422,5 +457,7 @@ def recipeSaved(recipeID):
 	else:
 		return False
 
+def getZipcode():
+	return "02215"
 	
 if __name__ == "__main__": app.run(port=5000, debug=True)
