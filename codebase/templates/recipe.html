@@ -16,11 +16,11 @@
           {% if saved %}
           <input type="submit" value = "Unsave recipe" name ="submit" />
 
-          {% if cooked %}
+          {%  if cooked %}
           <input type="submit" value = "Recipe cooked" name ="cookedButton" />
-          % else %
+          {% else %}
           <input type="submit" value = "Recipe not cooked" name ="cookedButton" />
-          {% endif %}
+          {%  endif %}
 
           {% else %}
           <input type="submit" value = "Save recipe" name ="submit" />

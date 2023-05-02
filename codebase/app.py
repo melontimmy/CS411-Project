@@ -103,23 +103,35 @@ def logout():
 	return render_template('browse.html', message='Logged out')
 		
 
-@app.route('/profile')
+@app.route('/profile', methods = ['GET', 'POST'])
 @flask_login.login_required
 def loadProfile():
-	email = flask_login.current_user.id
-	message = 'Hi ' + email + ', here is your profile!'
 
-	url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/informationBulk"
+	if flask.request.method == 'GET':
+		email = flask_login.current_user.id
+		message = 'Hi ' + email + ', here is your profile!'
 
-	querystring = {"ids":','.join(str(x) for x in getSavedRecipes())}
+		url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/informationBulk"
 
-	headers = {
-		"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
-		"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
-	}
-	response = requests.get(url, headers=headers, params=querystring).json()
+		querystring = {"ids":','.join(str(x) for x in getSavedRecipes())}
 
-	return render_template('profile.html', name=flask_login.current_user.id, message=message, recipes=response)
+		headers = {
+			"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+			"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
+		}
+		response = requests.get(url, headers=headers, params=querystring).json()
+
+		zipcode = getZipcode()
+
+		return render_template('profile.html', name=flask_login.current_user.id, message=message, recipes=response, zipcode = zipcode)
+	else:
+		email = flask_login.current_user.id
+		uid = getUserIdFromEmail(email)
+		cursor = conn.cursor()
+		if flask.request.form.get('submit'):
+			zipcode = flask.request.form.get('zipcode')
+			cursor.execute("UPDATE Users SET zipcode = '{0}' WHERE user_id = '{1}' ".format(zipcode, uid))
+			return flask.redirect(flask.url_for('loadProfile'))
 
 @app.route("/register", methods=['GET'])
 def register():
@@ -226,7 +238,6 @@ def fridge():
 		return render_template('fridge.html', ingredients=ingredients)
 	return render_template('fridge.html')
 
-
 @app.route("/fridge", methods=['POST', 'GET'])
 @flask_login.login_required
 def fridge_handler():
@@ -331,7 +342,7 @@ def browse():
 					for missing in recipe["missedIngredients"]:
 						recipe["missingString"] = recipe["missingString"] + missing["name"] + ","
 					recipe["missingString"] = recipe["missingString"][:-1]
-					print(recipe)
+		
 
 				return render_template('browse.html', recipes = results, message=message, **varDict, name=email)
 			else:
@@ -394,7 +405,7 @@ def recipe():
 			missing = []
 
 			if missingKeys:
-				missingKeys = missingKeys[:1]
+				missingKeys = missingKeys.split(",")
 				for ingred in missingKeys:
 					url2 = "https://weee-grocery-api-sayweee-com-browsing-searching-details.p.rapidapi.com/search"
 					querystring2 = {"zipcode":getZipcode(),"keyword":ingred,"limit":"1","offset":"0"}
@@ -403,12 +414,17 @@ def recipe():
 						"X-RapidAPI-Host": "weee-grocery-api-sayweee-com-browsing-searching-details.p.rapidapi.com"
 					}
 
-					response2 = requests.get(url2, headers=headers2, params=querystring2).json()["data"]
+					response2 = requests.get(url2, headers=headers2, params=querystring2).json()
+
+					if response2.get('data'):
+						response2 = response2['data']
+					else:
+						response2 = None
 
 					if response2 and response2.get('products'): missing += [{"name":ingred,"weee":response2["products"][0]}] 
 					else: missing += [{"name":ingred,"weee":None}]
-
-			return render_template('recipe.html', recipe=response.json(), saved=saved, id=id, missing=missing, cooked=False)
+			
+			return render_template('recipe.html', recipe=response.json(), saved=saved, id=id, missing=missing, cooked=recipeCooked(id))
 	else:
 		if not flask_login.current_user.is_authenticated:
 			return flask.redirect(flask.url_for('std_login'))
@@ -427,20 +443,23 @@ def recipe():
 				else:
 					if not cursor.execute("SELECT recipe_id FROM Recipes WHERE recipe_id = '{0}'".format(id)):
 						cursor.execute("INSERT INTO Recipes (recipe_id) VALUES ('{0}')".format(id))
-					cursor.execute("INSERT INTO Saved_by (user_id, recipe_id) VALUES ('{0}', '{1}')".format((uid), (id)))
+					cursor.execute("INSERT INTO Saved_by (user_id, recipe_id, cooked) VALUES ('{0}', '{1}', '{2}')".format((uid), (id), (0)))
 					conn.commit()
 
 					#add recipe
 				return flask.redirect(flask.url_for('loadProfile'))
 		else:
 
-			print('wow')
+			cursor.execute("UPDATE Saved_By SET cooked = NOT cooked WHERE user_id = '{0}' AND recipe_id = '{1}'".format(uid, id))
+
+			return flask.redirect(flask.url_for('recipe', id=id))
 
 def getSavedRecipes(): 
 	email = flask_login.current_user.id
 	id = getUserIdFromEmail(email)
 	cursor = conn.cursor()
 	cursor.execute("SELECT recipe_id FROM Recipes NATURAL JOIN Saved_by WHERE user_id = '{0}'".format(id))
+	
 	recipes = []
 	if cursor.rowcount > 0:
 		for i in cursor:
@@ -448,16 +467,36 @@ def getSavedRecipes():
 
 	return recipes
 
+def recipeCooked(recipeID): 
+	email = flask_login.current_user.id
+	id = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+
+	if cursor.execute("SELECT cooked+0 FROM Saved_By WHERE user_id = '{0}' AND recipe_id = '{1}'".format(id, recipeID)) > 0:
+		data = cursor.fetchone()
+		if data: return data[0]
+	else:
+		return False
+
 def recipeSaved(recipeID):
 	email = flask_login.current_user.id
 	uid = getUserIdFromEmail(email)
 	cursor = conn.cursor()
-	if cursor.execute("SELECT recipe_id FROM Saved_by WHERE recipe_id = '{0}' AND user_id = '{1}'".format(recipeID, uid)):
+	if cursor.execute("SELECT recipe_id FROM Saved_by WHERE recipe_id = '{0}' AND user_id = '{1}'".format(recipeID, uid)) > 0:
 		return True
 	else:
 		return False
 
 def getZipcode():
-	return "02215"
+	email = flask_login.current_user.id
+	id = getUserIdFromEmail(email)
+	cursor = conn.cursor()
+
+	if cursor.execute("SELECT zipcode FROM Users WHERE user_id = '{0}'".format(id)) > 0:
+		data = cursor.fetchone()
+		if data and data[0]: return data[0] 
+		else: return "02215"
+	else:
+		return "02215"
 	
 if __name__ == "__main__": app.run(port=5000, debug=True)

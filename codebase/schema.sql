@@ -18,20 +18,20 @@ CREATE TABLE IF NOT EXISTS Ingredients(
 	ingredient_id int4 AUTO_INCREMENT, 
     ingredient_name VARCHAR(255),
     date_added DATE,
-    CONSTRAINT ingredients_pk PRIMARY KEY (ingredient_id),
+    CONSTRAINT ingredients_pk PRIMARY KEY (ingredient_id)
 );
 
 CREATE TABLE IF NOT EXISTS Recipes( 
 	recipe_id int4 AUTO_INCREMENT, 
     recipe_name VARCHAR(255),
     date_saved DATE,
-    CONSTRAINT recipes_pk PRIMARY KEY (recipe_id),
+    CONSTRAINT recipes_pk PRIMARY KEY (recipe_id)
 );
 
 CREATE TABLE IF NOT EXISTS Saved_by(
 	user_id int4,
     recipe_id int4,
-    cooked BIT,
+    cooked BOOLEAN DEFAULT '0',
     PRIMARY KEY (user_id, recipe_id),
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (recipe_id) REFERENCES Recipes(recipe_id) ON DELETE CASCADE

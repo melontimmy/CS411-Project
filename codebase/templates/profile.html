@@ -5,6 +5,14 @@
 	<div>{{ message }}</div>
 {% endif %}
 
+<div id="content">
+    <form method="post" action="{{ url_for('loadProfile') }}">
+        <label for="text">Change your zip code:</label>
+        <input type="text" name="zipcode" value="{{zipcode}}"/> <br />
+        <input type="submit" name ="submit" />
+    </form>
+ </div>
+
 {% if recipes %}
 <h2>Here are some recipes with your ingredients:</h2>
     <ul style="list-style: none;">
