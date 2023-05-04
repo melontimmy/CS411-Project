@@ -1,0 +1,36 @@
+Project Stories Closing Thoughts
+
+-----------------------
+Story1:
+As a user, I want to be able to create a profile so that I can save my grocery/ingredients list and favorite recipes. When I create a profile, I should be able to add my basic information such as username, email, phone number, and password and be able to edit my profile information later if necessary. If something goes wrong during the registration, I should receive clear feedback on what went wrong and how to fix it. If I forget my username or password, I should be able to find them with either my phone number or email. If I click “I cooked this recipe”, it will automatically revise my ingredient list accordingly. 
+
+Thoughts: 
+For the most part, story1 was nearly entirely implemented. The database supports phone number support, but it was determined that adding these extra attributes were not relevant or useful to the website, so the feature was entirely scrapped. The same thing occured for usernames, as emails were used as the primary key instead.
+
+-----------------------
+Story2:
+As a user, I want to be able to search for recipes based on ingredients/grocery items that I already have, so that I can save money by using what I already have (also I don’t have to waste food). If I don’t have enough ingredients to make a particular recipe, the website should provide me with a suggested recipe with the least additional grocery items needed. In addition, I should have the option to sort these suggested recipes by the price of the additional ingredients, and I should be able to filter out more expensive recipes based on a budget that I provide. 
+
+Thoughts:
+The searching functionality based on availability of ingredients were entirely implemented. However, when it came to sorting the recipes through cost, it was deemed infeasible due to how expensive the API calls were, requiring an extra API call per ingredient price. Since the project was capped on the amount of API calls available per month, this feature was ultimately removed.
+
+-----------------------
+Story3:
+As a user, I want to be able browse through a list of recipes with a dietary filter. Since there may be multiple dietary restrictions I need to consider, I want to be able to select more than one restriction to further filter out recipes. If I specify I would like to exclude a certain ingredient, I should have an option to be suggested recipes that allow me to swap out the ingredient for an alternative (for example swap out cow’s milk for plant milk). I need to be able to save my dietary filters in case I want to easily search through recipes in the future.
+
+Thoughts:
+This story was nearly entirely implemented, thanks to the extensitive functionality of the Spoonicular API. A trouble was trying to present a format that would be easy for the user to use in the front-end, but in the end we chose to use simple textboxes since radio buttons would end up cluttering too much of the screen. Swapping out the ingredients for an alternative seemed infeasible and was scrapped due to the excessive amount of API calls the feature required.
+
+-----------------------
+Story4:
+As a user, I want to be able to save recipes to my profile so that I can easily find them later. When I find a recipe that I want to save, I should be able to click on a “Save” button and have the recipe saved to my list of saved recipes. If something goes wrong when trying to save a recipe, I should receive clear instructions on what went wrong and how to fix it. (ex. You need to log-in). I need to be able edit the list of my saved recipes by clicking “un-save” button. Within my saved recipes I should be able to sort them by different filters or by ingredients so I can easily access specific recipes when I need them.
+
+Thoughts: 
+Saving recipes was fully implemented. When users were not signed in and tried to save a recipe, they were simply redirected to the log-in page. However, we did not implement sorting through saved recipes since we were low on time, and the browse page already achieves a similar functionality.
+
+-----------------------
+Story5:
+As a user, I want to be able to create a grocery list from the recipes that I saved so that I can easily purchase the necessary ingredients/groceries when I go grocery shopping(either online or offline). I want to be able to purchase missing ingredients directly from the website so that I don’t have to search for them elsewhere. When I view a recipe that I want to make but am missing an ingredient for, I should be able to click on a “Buy Missing Ingredient” button and be directed to a page with links to purchase those ingredients from a third party website(amazon fresh) with a new tab/browser.
+
+Thoughts:
+The Weee! free API call cap was incredibly stringent and only 20 calls a MONTH was allowed. As such, creating a grocery list would cost too much API calls, so a workaround having the missing ingredients on a specific recipe was implemented instead. To workaround the low API call, multiple Weee! API accounts were made to bypass the cap during development. The buy missing ingredient button was implemented as a hyperlink with the name of the Weee! product. Due to the nature of how the Weee! query worked, the displayed Weee! products sometimes were very inaccurate and strange, but it was impossible to resolve this issue without more API calls, so we opted to just use the initial results the Weee! API returned to us.
