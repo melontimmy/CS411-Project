@@ -316,12 +316,9 @@ def browse():
 
 		if flask.request.full_path.find("query") != -1:
 
-			variables = ["query", "cuisine", "diet", "intolerances", "equipment", "includeIngredients", "excludeIngredients", "titleMatch", "offset", "sort", "sortDirection"]
+			variables = ["query", "cuisine", "diet", "intolerances", "equipment", "includeIngredients", "excludeIngredients", "titleMatch", "offset", "sort", "sortDirection", "ranking", "fridge"]
 			varDict = {}
 
-			if request.args.get("fridge") == "checked":
-				c = "true"
-				print(c)
 			querystring = {
 				"number":"20",
 				"ignorePantry":"true",
@@ -330,30 +327,14 @@ def browse():
 				#should include ranking, should be a radio button
 				}
 			
-
 			for variableName in variables:
 				if request.args.get(variableName):
 					querystring[variableName] = request.args.get(variableName)
 					varDict[variableName] = request.args.get(variableName)
 
-			fridgeIncluded = False
-			if not request.args.get("includeIngredients"):
-				varDict["includeIngredients"] = prioritizeFridge("")
-				fridgeIncluded = True
-
-			# the next few lines test the code. regardless of if the checkbox is checked or not, "fridge" does not show up in request.args
-			if request.args.get("fridge") == "checked":
-				c = "true"
-				print(c)
-			# end test code (dawg i rlly don't know why it's doing this)
-
-			if request.args.get("fridge") and not fridgeIncluded:
-				varDict["includeIngredients"] = prioritizeFridge(varDict["includeIngredients"])
-				print(varDict["includeIngredients"])
-				fridgeIncluded = True
-
-			print(request.args.get("ranking")) # this doesn't work either, just returns none
-
+			if varDict.get("fridge"):
+				querystring["includeIngredients"] = ",".join(getIngredients())
+				varDict["includeIngredients"] = ",".join(getIngredients())
 
 			headers = {
 				"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
@@ -397,14 +378,12 @@ def browse():
 				return render_template('browse.html', message='Login to save your recipes')
 	else:
 		def display(offset):
-			variables = ["query", "cuisine", "diet", "intolerances", "equipment", "includeIngredients", "excludeIngredients", "titleMatch", "offset", "sort", "sortDirection"]
+			variables = ["query", "cuisine", "diet", "intolerances", "equipment", "includeIngredients", "excludeIngredients", "titleMatch", "offset", "sort", "sortDirection", "ranking", "fridge"]
 			varDict = {}
 			for variableName in variables:
 				if flask.request.form.get(variableName):
 					varDict[variableName] = flask.request.form[variableName]
 			
-			#print(varDict)
-			#varDict["query"] = varDict.get("query") if varDict.get("query") else ""
 			varDict["offset"] = int(varDict.get("offset")) + offset if varDict.get("offset") else offset
 
 			if varDict["offset"] < 0: varDict["offset"]	= 0
