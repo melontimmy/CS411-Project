@@ -357,14 +357,22 @@ def browse():
 
 				results = response.json()["results"]
 				missing = {}
+
 				for recipe in results:
 					recipe["missingString"] = ""
+					recipe["missingCount"] = len(recipe["missedIngredients"])
+					recipe["usedCount"] = len(recipe["usedIngredients"])
 
 					for missing in recipe["missedIngredients"]:
 						recipe["missingString"] = recipe["missingString"] + missing["name"] + ","
 					recipe["missingString"] = recipe["missingString"][:-1]
-		
 
+				if varDict["ranking"] == "1": # maximize used ingredients
+					results = sorted(results, key=lambda x: x["usedCount"], reverse=True)
+				elif varDict["ranking"] == "0": # minimize missed ingredients
+					results = sorted(results, key=lambda x: x["missingCount"])
+
+				print(results)
 				return render_template('browse.html', recipes = results, message=message, **varDict, name=email)
 			else:
 				return render_template('browse.html', message='Something went wrong! Code: ' + str(response.status_code))
