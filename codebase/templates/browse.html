@@ -32,6 +32,11 @@
           <label for="text">Include Ingredients:</label> <!--should be a radio button-->
           <input type="text" name="includeIngredients" value="{{includeIngredients}}"/><br />
 
+          {% if name %}
+            <label for="checkbox1">Prioritize Ingredients in Fridge</label>
+            <input type="checkbox" id="checkbox1" name="fridge" value="checked"/><br/>
+          {% endif %}
+          
           <label for="text">Exclude Ingredients:</label>
           <input type="text" name="excludeIngredients" value="{{excludeIngredients}}"/><br />
 
@@ -49,7 +54,9 @@
 
           <label for="text">Offset:</label>
           <input type="text" name="offset" value="{{offset}}"/><br />
-
+          <input type="radio" name="ranking" value="relevance" checked="checked"/><label for="radio">Relevance</label><br/>
+          <input type="radio" name="ranking" value="mostIngredients"/><label for="radio">Most Ingredients</label><br/>
+          <input type="radio" name="ranking" value="leastMissing"/><label for="radio">Least Missing Ingredients</label><br/>
           <!--should include ranking, should be a radio button
           #"titleMatch":"Crock Pot", -->
 

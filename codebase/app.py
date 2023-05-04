@@ -122,7 +122,7 @@ def loadProfile():
 		response = requests.get(url, headers=headers, params=querystring).json()
 
 		zipcode = getZipcode()
-
+	
 		return render_template('profile.html', name=flask_login.current_user.id, message=message, recipes=response, zipcode = zipcode)
 	else:
 		email = flask_login.current_user.id
@@ -149,6 +149,7 @@ def register_user():
 	except:
 		return flask.redirect(flask.url_for('register'))
 	
+
 	if not emailExists(email):
 		cursor = conn.cursor()
 		cursor.execute("INSERT INTO Users (email, password, phone_number, dob, first_name, last_name) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')".format(email, password, phonenum, dob, fname, lname))
@@ -291,6 +292,22 @@ def deleteFromFridge():
 	return flask.redirect(flask.url_for('fridge'))
 
 
+def prioritizeFridge(str):
+	ingredients = getIngredients()
+	if len(ingredients) == 0:
+		return str
+	elif str == "":
+		first = True
+		for i in ingredients:
+			if not first:
+				str+=","
+			first = False
+			str+= (i)
+	else:
+		for i in ingredients:
+			str+=(","+i)
+	return str
+
 	#default page
 
 @app.route("/", methods=['GET', 'POST'])
@@ -302,6 +319,9 @@ def browse():
 			variables = ["query", "cuisine", "diet", "intolerances", "equipment", "includeIngredients", "excludeIngredients", "titleMatch", "offset", "sort", "sortDirection"]
 			varDict = {}
 
+			if request.args.get("fridge") == "checked":
+				c = "true"
+				print(c)
 			querystring = {
 				"number":"20",
 				"ignorePantry":"true",
@@ -310,11 +330,31 @@ def browse():
 				#should include ranking, should be a radio button
 				}
 			
+
 			for variableName in variables:
 				if request.args.get(variableName):
 					querystring[variableName] = request.args.get(variableName)
 					varDict[variableName] = request.args.get(variableName)
-			
+
+			fridgeIncluded = False
+			if not request.args.get("includeIngredients"):
+				varDict["includeIngredients"] = prioritizeFridge("")
+				fridgeIncluded = True
+
+			# the next few lines test the code. regardless of if the checkbox is checked or not, "fridge" does not show up in request.args
+			if request.args.get("fridge") == "checked":
+				c = "true"
+				print(c)
+			# end test code (dawg i rlly don't know why it's doing this)
+
+			if request.args.get("fridge") and not fridgeIncluded:
+				varDict["includeIngredients"] = prioritizeFridge(varDict["includeIngredients"])
+				print(varDict["includeIngredients"])
+				fridgeIncluded = True
+
+			print(request.args.get("ranking")) # this doesn't work either, just returns none
+
+
 			headers = {
 				"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
 				"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
