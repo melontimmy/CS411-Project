@@ -9,14 +9,14 @@ from authlib.integrations.flask_client import OAuth
 
 
 app = Flask(__name__)
-app.secret_key = 'secret_key'
+app.secret_key = os.getenv('secret_key')
 
 mysql = MySQL(app)
 oauth = OAuth(app)
 
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'mysql460' # change to your mysql pass
+app.config['MYSQL_DATABASE_HOST'] = os.getenv('sql_db_host')
+app.config['MYSQL_DATABASE_USER'] =  os.getenv('sql_db_user')
+app.config['MYSQL_DATABASE_PASSWORD'] =  os.getenv('sql_db_pass')
 app.config['MYSQL_DATABASE_DB'] = 'Wattocook'
 
 #begin code used for login
@@ -116,7 +116,7 @@ def loadProfile():
 		querystring = {"ids":','.join(str(x) for x in getSavedRecipes())}
 
 		headers = {
-			"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+			"X-RapidAPI-Key": os.getenv('spoonacularAPIKey'),
 			"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
 		}
 		response = requests.get(url, headers=headers, params=querystring).json()
@@ -168,8 +168,8 @@ def register_user():
 
 google = oauth.register( 
 	'google',
-	client_id='862135099082-a6oqavdq547skp16ndpcjvvg9r9e09b5.apps.googleusercontent.com',
-    client_secret='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',
+	client_id=os.getenv('googleClientID'),
+    client_secret=os.getenv('googleSecret'),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile email'}
 )
@@ -337,7 +337,7 @@ def browse():
 				varDict["includeIngredients"] = ",".join(getIngredients())
 
 			headers = {
-				"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+				"X-RapidAPI-Key": os.getenv('spoonaculuarAPIKey'),
 				"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
 			}
 
@@ -411,7 +411,7 @@ def recipe():
 		if id:
 
 			headers = {
-				"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+				"X-RapidAPI-Key": os.getenv('spoonaculuarAPIKey'),
 				"X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
 			}
 
@@ -437,7 +437,7 @@ def recipe():
 					url2 = "https://weee-grocery-api-sayweee-com-browsing-searching-details.p.rapidapi.com/search"
 					querystring2 = {"zipcode":getZipcode(),"keyword":ingred,"limit":"1","offset":"0"}
 					headers2 = {
-						"X-RapidAPI-Key": "7912aaf695msh41bcbd54212220dp1fe4b0jsn348ff00d1c37",
+						"X-RapidAPI-Key": os.getenv('weeeeAPIKey'),
 						"X-RapidAPI-Host": "weee-grocery-api-sayweee-com-browsing-searching-details.p.rapidapi.com"
 					}
 
@@ -522,7 +522,7 @@ def getZipcode():
 	if cursor.execute("SELECT zipcode FROM Users WHERE user_id = '{0}'".format(id)) > 0:
 		data = cursor.fetchone()
 		if data and data[0]: return data[0] 
-		else: return "02215"
+		else: return "02215" #default zipcode
 	else:
 		return "02215"
 	
